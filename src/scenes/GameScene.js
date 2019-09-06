@@ -1,7 +1,9 @@
-let hp;
-let hpLog = 5;
-let keyboards;
-let life = 5;
+let width
+let height
+let x
+let y
+let bat
+
 class GameScene extends Phaser.Scene {
     constructor(test) {
         super({
@@ -10,107 +12,86 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.spritesheet('player', 'src/assets/ship.png', { frameWidth: 16, frameHeight: 24 })
-        this.load.spritesheet('hp', 'src/assets/HP.png', { frameWidth: 2510, frameHeight: 1410 })
-        this.load.image('bullet', 'src/assets/Bullet.png')
-        
+
+        this.load.image("bg", "src/assets/bg.png");
+
+        this.load.spritesheet("bat", "src/assets/bat.png", {
+            frameWidth: 62,
+            frameHeight: 30
+        });
+
     }
 
     create() {
-        hp = this.add.sprite(80, 50, 'hp').setScale(0.05) 
 
-        this.player = new Player(
-            this,
-            this.game.config.width * 0.5,
-            this.game.config.height * 0.5,
-            'player'
-        );
-        
-        this.anims.create({
-            key: '5HP',
-            frames: [ { key: 'hp', frame: 0 } ],
-            frameRate: 1,
-            repeat: -1
-        })
-        this.anims.create({
-            key: '4HP',
-            frames: [ { key: 'hp', frame: 1 } ],
-            frameRate: 1,
-            repeat: -1
-        })
-        this.anims.create({
-            key: '3HP',
-            frames: [ { key: 'hp', frame: 2 } ],
-            frameRate: 1,
-            repeat: -1
-        })
-        this.anims.create({
-            key: '2HP',
-            frames: [ { key: 'hp', frame: 3 } ],
-            frameRate: 1,
-            repeat: -1
-        })
-        this.anims.create({
-            key: '1HP',
-            frames: [ { key: 'hp', frame: 4 } ],
-            frameRate: 1,
-            repeat: -1
-        })
-        this.anims.create({
-            key: '0HP',
-            frames: [ { key: 'hp', frame: 5 } ],
-            frameRate: 1,
-            repeat: -1
-        })
-        this.anims.create({
-            key: 'playerNotMove',
-            frames: [ { key: 'player', frame: 2 } ]
-        })
+        //set ขนาดให้กับ map ของเกม
+        width = this.scene.scene.physics.world.bounds.width;
+        height = this.scene.scene.physics.world.bounds.height;
 
-        
-        
-        this.player.anims.play('playerNotMove')
+        x = width * 0.5;
+        y = height * 0.5;
+
+        this.add.image(x, y, 'bg').setScale(0.5);
+
+        bat = this.physics.add.sprite(x, -150, 'bat');
+
+        //ตรงนี้จะใช้ this.body.velocity.y เปลี่ยนจาก this เป็นชื่อ object >>>>> reference from http://www.html5gamedevs.com/topic/32657-velocity-is-undefined/
+        bat.body.velocity.y = Phaser.Math.Between(50, 100);
+        console.log(bat.y)
+
+        this.anims.create({
+            key: "coming",
+            frames: this.anims.generateFrameNumbers("bat", { start: 0, end: 2 }),
+            frameRate: 20,
+            frameQuantity: 32,
+            repeat: -1
+
+        });
+
+        this.time.addEvent({
+            delay: 100,
+            callback: function () {
+                for(let i = 0; i < 25; i++){
+
+                }
+            },
+            callbackScope: this,
+            loop: true
+        });
+
+        // this.time.addEvent({
+        //     delay: 1000, // this can be changed to a higher value like 1000
+        //     callback: function () {
+        //         var enemy = new GunShip(
+        //             this,
+        //             Phaser.Math.Between(0, this.game.config.width),
+        //             0
+        //         );
+        //         this.enemies.add(enemy);
+        //     },
+        //     callbackScope: this,
+        //     loop: true
+        // });
 
     }
-    
+
+    releaseBat() {
+
+    }
+
     update() {
-        if(keyboards.up.isDown){
-            this.lossHealth()
-        }else if(keyboards.down.isDown){
-            this.healHealth()
-        }
-        if(hpLog >= 5){
-            hp.anims.play('5HP')
-        }else if(hpLog == 4){
-            hp.anims.play('4HP')
-        }else if(hpLog == 3){
-            hp.anims.play('3HP')
-        }else if(hpLog == 2){
-            hp.anims.play('2HP')
-        }else if(hpLog == 1){
-            hp.anims.play('1HP')
-        }else{
-            hp.anims.play('0HP')
-            this.isDie()
+
+        bat.anims.play('coming', true);
+
+        bat.y += 2;
+
+        if (bat.y > 1050) {
+            bat.y = -150;
+            bat.x = Phaser.Math.Between(70, 580);
         }
 
     }
 
-    lossHealth(){
-        hpLog--;
-        console.log(hpLog)
-    }
-    healHealth(){
-        hpLog++;
-        console.log(hpLog)
-    }
-    isDie(){
-        life--;
-        if(life == 0){
-            this.scene.pause()
-        }else{
-            hpLog = 5;
-        }
-    }
 }
+
 export default GameScene;
