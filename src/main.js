@@ -16,7 +16,6 @@ const config = {
     },
     scene: [
         GameScene
-        // Entity
     ]
 };
 

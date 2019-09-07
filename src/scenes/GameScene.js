@@ -3,6 +3,7 @@ let height
 let x
 let y
 let bat
+let group
 
 class GameScene extends Phaser.Scene {
     constructor(test) {
@@ -24,6 +25,11 @@ class GameScene extends Phaser.Scene {
 
     create() {
 
+        // reference : https://labs.phaser.io/edit.html?src=src\game%20objects\group\sprite%20pool.js
+        // reference2 : http://labs.phaser.io/edit.html?src=src%5Canimation%5Con%20start%20callback.js
+        // reference3 : https://rexrainbow.github.io/phaser3-rex-notes/docs/site/group/
+        // reference4 : https://yorkcs.com/2019/02/08/build-a-space-shooter-with-phaser-3-4/
+
         //set ขนาดให้กับ map ของเกม
         width = this.scene.scene.physics.world.bounds.width;
         height = this.scene.scene.physics.world.bounds.height;
@@ -33,11 +39,14 @@ class GameScene extends Phaser.Scene {
 
         this.add.image(x, y, 'bg').setScale(0.5);
 
-        bat = this.physics.add.sprite(x, -150, 'bat');
+        // bat = this.physics.add.sprite(x, -150, 'bat');
+        // group = this.add.group();
+        // group.createMultiple({ key: "bat", repeat: 50});
+        // group.playAnimation('bat');
 
         //ตรงนี้จะใช้ this.body.velocity.y เปลี่ยนจาก this เป็นชื่อ object >>>>> reference from http://www.html5gamedevs.com/topic/32657-velocity-is-undefined/
-        bat.body.velocity.y = Phaser.Math.Between(50, 100);
-        console.log(bat.y)
+        // bat.body.velocity.y = Phaser.Math.Between(50, 100);
+        // console.log(bat.y)
 
         this.anims.create({
             key: "coming",
@@ -48,50 +57,63 @@ class GameScene extends Phaser.Scene {
 
         });
 
-        this.time.addEvent({
-            delay: 100,
-            callback: function () {
-                for(let i = 0; i < 25; i++){
-
-                }
+        group = this.add.group({
+            defaultKey: 'bat',
+            maxSize: 100,
+            createCallback: function (bat) {
+                bat.setName('bat' + this.getLength());
+                console.log('Created', bat.name);
             },
-            callbackScope: this,
+            removeCallback: function (bat) {
+                console.log('Removed', bat.name);
+            }
+        });
+
+        this.time.addEvent({
+            delay: 1200,
+            callback: addBat,
             loop: true
         });
 
-        // this.time.addEvent({
-        //     delay: 1000, // this can be changed to a higher value like 1000
-        //     callback: function () {
-        //         var enemy = new GunShip(
-        //             this,
-        //             Phaser.Math.Between(0, this.game.config.width),
-        //             0
-        //         );
-        //         this.enemies.add(enemy);
-        //     },
-        //     callbackScope: this,
-        //     loop: true
-        // });
-
     }
 
-    releaseBat() {
-
-    }
 
     update() {
 
-        bat.anims.play('coming', true);
+        Phaser.Actions.IncY(group.getChildren(), 1);
 
-        bat.y += 2;
+        group.children.iterate(function (bat) {
+            if (bat.y > 900) {
+                group.killAndHide(bat);
+            }
+        });
 
-        if (bat.y > 1050) {
-            bat.y = -150;
-            bat.x = Phaser.Math.Between(70, 580);
-        }
+        // bat.anims.play('coming', true);
+
+        // bat.y += 2;
+
+        // if (bat.y > 1050) {
+        //     bat.y = -150;
+        //     bat.x = Phaser.Math.Between(70, 580);
+        // }
 
     }
 
+}
+
+function addBat() {
+    var bat = group.get(Phaser.Math.Between(50, 570), Phaser.Math.Between(-64, 0));
+
+    if (!bat) return; // None free
+
+    activateBat(bat);
+}
+
+function activateBat (bat) {
+    bat
+    .setActive(true)
+    .setVisible(true)
+    .play('coming');
 }
 
 export default GameScene;
