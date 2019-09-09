@@ -70,6 +70,27 @@ class GameScene extends Phaser.Scene {
         
         
         this.player.anims.play('playerNotMove')
+        this.add.image(0, 0, "9");
+        this.Play = this.add.sprite(
+            this.game.config.width * 0.5,
+            this.game.config.height * 0.5,
+            "2"
+        );
+        
+       
+        this.Play.setInteractive();
+
+        
+            
+        this.Play.on("pointerdown", function () {
+            this.Play.setTexture("2");
+           
+            this.scene.start('GameScene');
+        }, this);
+
+        
+        var text = this.add.text(250, 350, 'Play', { fill: '#00ff00' });
+    
 
     }
     
