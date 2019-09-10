@@ -103,6 +103,8 @@ class GameScene extends Phaser.Scene {
             }
     
         });
+
+        
         
         player.anims.play('playerNotMove')
         
@@ -112,6 +114,7 @@ class GameScene extends Phaser.Scene {
             runChildUpdate: true
         });
 
+        console.log('bullets length: ' + bullets.getLength())
     }
     
     update() {
