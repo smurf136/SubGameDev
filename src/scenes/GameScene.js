@@ -23,7 +23,7 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.load.image('bullet', 'src/assets/Bullet.png')
-        // this.load.image("bg", "src/assets/bg.png");
+        this.load.image('sky', '../../src/assets/background.png');
         this.load.spritesheet('player', 'src/assets/ship.png', {
             frameWidth: 16,
             frameHeight: 24
@@ -40,9 +40,12 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        // BG
+        this.tileSprite = this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'sky').setOrigin(0, 0)
+
         // Player
         hp = this.add.sprite(80, 50, 'hp').setScale(0.05)
-        player = this.physics.add.sprite(287, 659, 'player')
+        player = this.physics.add.sprite(287, 659, 'player').setScale(2).setSize(2)
 
         this.anims.create({
             key: '5HP',
@@ -143,30 +146,42 @@ class GameScene extends Phaser.Scene {
 
         player.anims.play('playerNotMove')
 
-        bullets = this.physics.add.group({
-            classType: Bullet,
-            maxSize: 30,
-            runChildUpdate: true
-        });
+        bullets = this.physics.add.group();
+        this.time.addEvent({
+            delay: 500,
+            callback: function () {
+                bullet = this.physics.add.image(player.x, player.y - 100, 'bullet').setScale(0.5)
+                bullets.add(bullet)
+                bullets.setVelocityY(-300)
+                if(bullet.y<=0){
+                    bullet.destroy()
+                }
+            },
+            callbackScope: this,
+            loop: true
+        })
 
         console.log('bullets length: ' + bullets.getLength())
-        
+
         // Enemy
         width = this.scene.scene.physics.world.bounds.width;
         height = this.scene.scene.physics.world.bounds.height;
-        
+
         x = width * 0.5;
         y = height * 0.5;
-        
+
         this.anims.create({
             key: "coming",
-            frames: this.anims.generateFrameNumbers("bat", { start: 0, end: 2 }),
+            frames: this.anims.generateFrameNumbers("bat", {
+                start: 0,
+                end: 2
+            }),
             frameRate: 20,
             frameQuantity: 32,
             repeat: -1
-            
+
         });
-        
+
         enemy = this.physics.add.group({
             defaultKey: 'bat',
             maxSize: 100,
@@ -179,20 +194,18 @@ class GameScene extends Phaser.Scene {
                 console.log('Removed', bat.name);
             }
         });
-        
+
         this.time.addEvent({
             delay: 1200,
             callback: addBat,
             loop: true
         });
-        
+
         this.physics.add.collider(bullets, enemy, this.hitEnemy)
-        this.physics.add.collider(bullets, enemy, function(){
-            console.log('Hit')
-        })
+        
 
     }
-    
+
     update() {
 
         // Player
@@ -232,14 +245,6 @@ class GameScene extends Phaser.Scene {
 
         // console.log('player.x: ' + player.x)
         // console.log('player.y: ' + player.y)
-
-        bullet = bullets.get();
-        if (bullet != null) {
-            if (bullet) {
-                bullet.setScale(0.05).setSize(0.05).fire(player.x, player.y);
-            }
-        }
-
         bullets.children.each(function (b) {
             if (b.active) {
                 if (b.y < 0) {
@@ -256,6 +261,9 @@ class GameScene extends Phaser.Scene {
                 enemy.killAndHide(bat);
             }
         });
+
+        // BG
+        this.tileSprite.tilePositionY -= 20;
 
 
 
@@ -277,26 +285,29 @@ class GameScene extends Phaser.Scene {
             hpLog = 5;
         }
     }
-    hitEnemy(bullet, enemy){
+    
+    hitEnemy(bullet, enemy) {
         enemy.disableBody(true, true)
+        console.log('Hit')
     }
 
-
 }
+
+
 function addBat() {
     var bat = enemy.get(Phaser.Math.Between(50, 570), Phaser.Math.Between(-64, 0));
-    
+
     activateBat(bat);
-    
+
     if (!bat) return; // None free
 
 }
 
-function activateBat (bat) {
+function activateBat(bat) {
     bat
-    .setActive(true)
-    .setVisible(true)
-    .play('coming');
+        .setActive(true)
+        .setVisible(true)
+        .play('coming');
 }
 
 export default GameScene;
