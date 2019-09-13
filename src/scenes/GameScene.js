@@ -2,7 +2,6 @@ let width
 let height
 let x
 let y
-let bat
 let group
 
 class GameScene extends Phaser.Scene {
@@ -69,10 +68,16 @@ class GameScene extends Phaser.Scene {
             }
         });
 
+        group.createMultiple({
+            active: false,
+            key: group.defaultKey,
+            repeat: group.maxSize - 1
+        });
+
         this.time.addEvent({
-            delay: 1200,
-            callback: addBat,
-            loop: true
+            delay: 1000,
+            loop: true,
+            callback: addBat
         });
 
     }
